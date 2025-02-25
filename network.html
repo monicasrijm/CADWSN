@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(34, 34, 34, 0.9);
+            padding: 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .navbar a:hover {
+            background: #4CAF50;
+            border-radius: 5px;
+        }
+        .content {
+            margin-top: 70px;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card h2 {
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background: rgba(255, 255, 255, 0.2);
+            margin: 5px 0;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        ul li:hover {
+            background: #4CAF50;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .button-group button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .button-group button:hover {
+            background: #45a049;
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card {
+                margin: 10px;
+                padding: 15px;
+            }
+        }
+         .alert {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .alert-error {
+            background-color: #ff4d4d;
+            color: white;
+        }
+        .alert-success {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a onclick="showSection('home')">Home</a>
+        <a onclick="showSection('network-status')">Live network status</a>
+        <a onclick="showSection('detected-threats')">Detected Threats</a>
+        <a onclick="showSection('attack-logs')">Attack Logs View</a>
+        <a onclick="showSection('data-visualization')">Data Visualization View</a>
+    </div>
+
+    <div class="content">
+        <h1>Network Dashboard</h1>
+
+        <!-- Default Section -->
+        <div id="home" class="card">
+           <h2>System Activity & Alerts</h2>
+        </div>
+         
+        <div id="network-status" class="card" style="display: none;">
+            <h2>Live Network Status</h2>
+            <p id="network-status-text">Checking network...</p>
+            <canvas id="network-chart" width="600" height="400"></canvas>
+        </div>
+
+        <div id="detected-threats" class="card" style="display: none;">
+            <h2>Detected Threats</h2>
+            <ul id="threat-list"></ul>
+        </div>
+
+        <div id="attack-logs" class="card" style="display: none;">
+            <h2>Previous Cyber Attacks</h2>
+            <ul id="attack-log-list"></ul>
+        </div>
+
+        <div id="data-visualization" class="card" style="display: none;">
+            <h2>Data Visualization View</h2>
+            <div class="button-group">
+                <button onclick="showAnomalyGraph()">Flow of Anomalies</button>
+                <button onclick="showPacketFlowGraph()">Packet Flow Trends</button>
+            </div>
+        </div>
+
+        <div id="flow-anomalies" class="card" style="display: none;">
+            <h2>Flow of Anomalies</h2>
+            <canvas id="anomaly-chart"></canvas>
+        </div>
+
+        <div id="packet-flow-trends" class="card" style="display: none;">
+            <h2>Real-Time Packet Flow Trends</h2>
+            <canvas id="packet-flow-chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections first
+            document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
+            
+            // Show the selected section
+            if (sectionId === 'network-status') {
+                renderNetworkChart(); // Ensure the chart is rendered when this section is displayed
+            }
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        // Simulate network chart data
+        let chartInstance;
+        function renderNetworkChart() {
+            const ctx = document.getElementById('network-chart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',  // Change the chart type if needed
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],  // x-axis labels (time or data points)
+                    datasets: [{
+                        label: 'Network Traffic (Mbps)',
+                        data: [12, 19, 3, 5, 2, 3, 8, 9, 15, 12],  // y-axis values (network traffic)
+                        borderColor: '#4CAF50',  // Line color
+                        fill: false,  // No fill under the line
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Network Traffic (Mbps)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Update the chart every 2 seconds
+            setInterval(updateChartData, 2000);
+        }
+
+        // Function to update chart data (simulating network activity)
+        function updateChartData() {
+            const newData = Math.floor(Math.random() * 20); // Random data for simulation
+            chartInstance.data.datasets[0].data.push(newData);
+            chartInstance.data.labels.push(chartInstance.data.labels.length + 1);
+            if (chartInstance.data.labels.length > 10) {
+                chartInstance.data.labels.shift();
+                chartInstance.data.datasets[0].data.shift();
+            }
+            chartInstance.update();
+        }
+
+    </script>
+</body>
+</html>

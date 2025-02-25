@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(34, 34, 34, 0.9);
+            padding: 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .navbar a:hover {
+            background: #4CAF50;
+            border-radius: 5px;
+        }
+        .content {
+            margin-top: 70px;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card h2 {
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background: rgba(255, 255, 255, 0.2);
+            margin: 5px 0;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        ul li:hover {
+            background: #4CAF50;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .button-group button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .button-group button:hover {
+            background: #45a049;
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card {
+                margin: 10px;
+                padding: 15px;
+            }
+        }
+         .alert {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .alert-error {
+            background-color: #ff4d4d;
+            color: white;
+        }
+        .alert-success {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+         <a onclick="showSection('home')">Home</a>
+        <a onclick="showSection('network-status')">Live network status</a>
+        <a onclick="showSection('detected-threats')">Detected Threats</a>
+        <a onclick="showSection('attack-logs')">Attack Logs View</a>
+        <a onclick="showSection('data-visualization')">Data Visualization View</a>
+    </div>
+
+    <div class="content">
+        <h1>Network Dashboard</h1>
+
+        <!-- Alerts Section -->
+        <div id="alert-section">
+            <!-- Alerts will be shown here dynamically -->
+        </div>
+    
+        <!-- Default Section -->
+        <div id="home" class="card">
+           <h2>System Activity & Alerts</h2>
+
+            <!-- System Activity Section -->
+            <div id="system-activity">
+                <h3>System Activity</h3>
+
+                <!-- Intrusion Detection Status -->
+                <div id="alert-status">
+                    <p><strong>Status: </strong><span id="status">Safe</span></p>
+                </div>
+
+                <!-- Network Activity Status -->
+                <div id="network-activity">
+                    <p><strong>Network Activity: </strong><span id="network-status">Normal</span></p>
+                </div>
+
+                <!-- Intrusion Detected Alert -->
+                <div id="intrusion-alert" style="display: none;">
+                    <p><strong>⚠️ Intrusion Detected! ⚠️</strong></p>
+                </div>
+
+                <!-- Unusual Activity Alert -->
+                <div id="unusual-activity-alert" style="display: none;">
+                    <p><strong>⚠️ Unusual Network Activity Detected! ⚠️</strong></p>
+                </div>
+
+                <!-- System Status -->
+                <div id="system-status">
+                    <p><strong>System Status: </strong><span id="system-health">Safe</span></p>
+                </div>
+            </div>
+
+        </div>
+         
+        <div id="network-status" class="card" style="display: none;">
+            <h2>Live Network Status</h2>
+            <p id="network-status-text">Checking network...</p>
+            <canvas id="network-chart" width="600" height="400"></canvas>
+        </div>
+
+        <!-- Detected Threats Section -->
+        <div id="detected-threats" class="card" style="display: none;">
+            <h2>Detected Threats</h2>
+            <ul id="threat-list"></ul>
+        </div>
+
+        <!-- Attack Logs View Section -->
+        <div id="attack-logs" class="card" style="display: none;">
+            <h2>Previous Cyber Attacks</h2>
+            <ul id="attack-log-list">
+                <!-- Sample attack logs -->
+                <li>2023-12-15 11:30 AM - DDoS Attack on Web Server</li>
+                <li>2023-12-10 02:15 PM - Phishing Attempt on User Login</li>
+                <li>2023-11-22 10:45 AM - Ransomware Attack on File System</li>
+                <li>2023-11-05 08:00 PM - SQL Injection on Database</li>
+                <li>2023-10-30 04:30 AM - Malware Attack on Endpoint</li>
+            </ul>
+        </div>
+
+        <!-- Data Visualization Section (buttons shown only after clicking) -->
+        <div id="data-visualization" class="card" style="display: none;">
+            <h2>Data Visualization View</h2>
+            <div class="button-group">
+                <button onclick="showAnomalyGraph()">Flow of Anomalies</button>
+                <button onclick="showPacketFlowGraph()">Packet Flow Trends</button>
+            </div>
+        </div>
+
+        <!-- Flow of Anomalies Graph -->
+        <div id="flow-anomalies" class="card" style="display: none;">
+            <h2>Flow of Anomalies</h2>
+            <canvas id="anomaly-chart"></canvas>
+        </div>
+
+        <!-- Real-Time Packet Flow Trends Graph (Bar Chart) -->
+        <div id="packet-flow-trends" class="card" style="display: none;">
+            <h2>Real-Time Packet Flow Trends</h2>
+            <canvas id="packet-flow-chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+      // Declare chartInstance here
+
+        function showSection(sectionId) {
+            // Hide all sections first
+            document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
+            
+            // Show the selected section
+            if (sectionId === 'data-visualization') {
+                document.getElementById(sectionId).style.display = 'block';
+            } else {
+                document.getElementById(sectionId).style.display = 'block';
+            }
+        }
+        function showSection(sectionId) {
+            // Hide all sections first
+            document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
+            
+            // Show the selected section
+            if (sectionId === 'network-status') {
+                renderNetworkChart(); // Ensure the chart is rendered when this section is displayed
+            }
+            document.getElementById(sectionId).style.display = 'block';
+        }
+        
+        // Simulate network chart data
+         let chartInstance;
+        function renderNetworkChart() {
+            const ctx = document.getElementById('network-chart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',  // Change the chart type if needed
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],  // x-axis labels (time or data points)
+                    datasets: [{
+                        label: 'Network Traffic (Mbps)',
+                        data: [12, 19, 3, 5, 2, 3, 8, 9, 15, 12],  // y-axis values (network traffic)
+                        borderColor: '#4CAF50',  // Line color
+                        fill: false,  // No fill under the line
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Network Traffic (Mbps)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Update the chart every 2 seconds
+            setInterval(updateChartData, 2000);
+        }
+
+        // Function to update chart data (simulating network activity)
+        function updateChartData() {
+            const newData = Math.floor(Math.random() * 20); // Random data for simulation
+            chartInstance.data.datasets[0].data.push(newData);
+            chartInstance.data.labels.push(chartInstance.data.labels.length + 1);
+            if (chartInstance.data.labels.length > 10) {
+                chartInstance.data.labels.shift();
+                chartInstance.data.datasets[0].data.shift();
+            }
+            chartInstance.update();
+        }
+
+        function updateSystemActivity() {
+            // Randomly trigger alerts (Simulation)
+            const status = Math.random();
+            const networkStatus = Math.random();
+            const systemHealth = Math.random();
+
+            // Default system state: Safe
+            let alertStatus = "Safe";
+            let networkActivity = "Normal";
+            let systemHealthStatus = "Safe";
+
+            // Conditions to trigger alerts
+            if (status > 0.7) {
+                alertStatus = "Intrusion Detected";
+                document.getElementById('intrusion-alert').style.display = 'block';
+            } else {
+                document.getElementById('intrusion-alert').style.display = 'none';
+            }
+
+            if (networkStatus > 0.7) {
+                networkActivity = "Unusual Activity Detected";
+                document.getElementById('unusual-activity-alert').style.display = 'block';
+            } else {
+                document.getElementById('unusual-activity-alert').style.display = 'none';
+            }
+
+            if (systemHealth > 0.85) {
+                systemHealthStatus = "Under Attack";
+                document.getElementById('status').style.color = 'red';
+                document.getElementById('system-health').style.color = 'red';
+            } else {
+                systemHealthStatus = "Safe";
+                document.getElementById('status').style.color = 'green';
+                document.getElementById('system-health').style.color = 'green';
+            }
+
+            // Update the UI with the status
+            document.getElementById('status').innerText = alertStatus;
+            document.getElementById('network-status').innerText = networkActivity;
+            document.getElementById('system-health').innerText = systemHealthStatus;
+        }
+
+        // Update system activity every 3 seconds
+        setInterval(updateSystemActivity, 3000);
+
+        // Simulate intrusion detection alert
+        function showIntrusionAlert() {
+            const alertSection = document.getElementById('alert-section');
+            const alert = document.createElement('div');
+            alert.classList.add('alert', 'alert-error');
+            alert.textContent = 'Intrusion Detected! Immediate action required!';
+            alertSection.appendChild(alert);
+        }
+         // Simulate network chart data
+           
+
+        // Simulate live detected threats
+        const threatList = document.getElementById("threat-list");
+
+        const threatTypes = [
+            "DDoS Attack",
+            "Phishing Attempt",
+            "Ransomware",
+            "Malware",
+            "SQL Injection",
+            "Cross-Site Scripting"
+        ];
+
+        const threatSeverities = ["Low", "Medium", "High", "Critical"];
+        const threatTimes = ["10:30 AM", "11:15 AM", "12:45 PM", "1:30 PM", "2:15 PM", "3:00 PM"];
+
+        function updateThreats() {
+            let li = document.createElement("li");
+            const threatType = threatTypes[Math.floor(Math.random() * threatTypes.length)];
+            const severity = threatSeverities[Math.floor(Math.random() * threatSeverities.length)];
+            const time = threatTimes[Math.floor(Math.random() * threatTimes.length)];
+            li.textContent = `${threatType} - ${severity} (${time})`;
+            threatList.prepend(li);  // Add new threats at the top
+        }
+
+        setInterval(updateThreats, 5000); 
+
+        // Show anomaly graph
+        function showAnomalyGraph() {
+            document.getElementById('flow-anomalies').style.display = 'block';
+            document.getElementById('packet-flow-trends').style.display = 'none';
+            updateAnomalyGraph();
+        }
+
+        // Show packet flow trends graph
+        function showPacketFlowGraph() {
+            document.getElementById('flow-anomalies').style.display = 'none';
+            document.getElementById('packet-flow-trends').style.display = 'block';
+            updatePacketFlowGraph();
+        }
+
+       
+        // Simulate Flow of Anomalies Chart
+        const anomalyCtx = document.getElementById('anomaly-chart').getContext('2d');
+        const anomalyChart = new Chart(anomalyCtx, {
+            type: 'line',
+            data: {
+                labels: [0, 1, 2, 3, 4, 5],
+                datasets: [{
+                    label: 'Anomaly Flow (Units)',
+                    data: [10, 20, 15, 30, 40, 50],
+                    borderColor: '#FF6347',
+                    backgroundColor: 'rgba(255, 99, 71, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { 
+                        type: 'linear',
+                        position: 'bottom'
+                    },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Simulate real-time packet flow data update (Bar chart)
+        const packetFlowCtx = document.getElementById('packet-flow-chart').getContext('2d');
+        const packetFlowChart = new Chart(packetFlowCtx, {
+            type: 'bar', // Change to bar chart type
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Real-Time Packet Flow (Mbps)',
+                    data: [],
+                    backgroundColor: '#00BFFF',
+                    borderColor: '#00BFFF',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { 
+                        type: 'linear',
+                        position: 'bottom'
+                    },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Simulate real-time packet flow data update (random packet flow)
+        let packetTime = 0;
+        function updatePacketFlow() {
+            if (packetFlowChart.data.labels.length > 20) {
+                packetFlowChart.data.labels.shift();
+                packetFlowChart.data.datasets[0].data.shift();
+            }
+            packetFlowChart.data.labels.push(packetTime++);
+            packetFlowChart.data.datasets[0].data.push(Math.random() * 50); // Random data for simulation
+            packetFlowChart.update();
+        }
+        setInterval(updatePacketFlow, 3000);  // Update packet flow every 3 seconds
+    </script>
+</body>
+</html>
